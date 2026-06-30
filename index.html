@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TextLense</title>
+    <style>
+      :root {
+        --bg: #f6f3fb;
+        --surface: #ffffff;
+        --line: #d9def0;
+        --text: #1e2438;
+        --muted: #65708a;
+        --blue: #2776de;
+        --teal: #0f9f9a;
+        --pink: #d44695;
+        --shadow: 0 14px 34px rgba(50, 57, 91, 0.11);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(180deg, #f8f7ff 0%, var(--bg) 100%);
+        color: var(--text);
+      }
+
+      .app {
+        max-width: 1360px;
+        margin: 0 auto;
+        min-height: 100vh;
+      }
+
+      .header {
+        min-height: 150px;
+        padding: 28px 32px;
+        color: white;
+        background: linear-gradient(90deg, #5f45ef 0%, #2479dc 62%, #0f9f9a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .brand {
+        display: grid;
+        gap: 8px;
+      }
+
+      .eyebrow {
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0;
+        opacity: 0.9;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 64px;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .status {
+        border: 1px solid rgba(255, 255, 255, 0.42);
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        padding: 14px 20px;
+        font-weight: 800;
+        font-size: 18px;
+      }
+
+      .workspace {
+        padding: 28px 24px 36px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(420px, 0.95fr);
+        gap: 22px;
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        padding: 22px;
+      }
+
+      .panel-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .title {
+        font-size: 24px;
+        font-weight: 850;
+        letter-spacing: 0;
+        margin: 0;
+      }
+
+      .count {
+        color: var(--muted);
+        font-size: 16px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      label {
+        display: block;
+        color: #3d455d;
+        font-size: 14px;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+
+      .field-group {
+        display: grid;
+        gap: 16px;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--text);
+        font: inherit;
+        font-size: 16px;
+        outline: none;
+        padding: 14px 15px;
+      }
+
+      input:focus,
+      textarea:focus {
+        border-color: #77b7f5;
+        box-shadow: 0 0 0 4px rgba(119, 183, 245, 0.2);
+      }
+
+      textarea {
+        min-height: 520px;
+        resize: vertical;
+        line-height: 1.5;
+      }
+
+      .upload-box {
+        align-items: center;
+        background: #f8faff;
+        border: 2px dashed #9dadcc;
+        color: var(--text);
+        cursor: pointer;
+        display: flex;
+        gap: 28px;
+        min-height: 150px;
+        padding: 34px 36px;
+        transition: border-color 160ms ease, background 160ms ease;
+      }
+
+      .upload-box:hover,
+      .upload-box:focus-within {
+        background: #f3f7ff;
+        border-color: #648bd8;
+      }
+
+      .upload-plus {
+        align-items: center;
+        background: #2d5ff3;
+        color: white;
+        display: flex;
+        flex: 0 0 auto;
+        font-size: 58px;
+        font-weight: 500;
+        height: 92px;
+        justify-content: center;
+        line-height: 1;
+        width: 92px;
+      }
+
+      .upload-title {
+        display: block;
+        font-size: 28px;
+        font-weight: 850;
+        line-height: 1.1;
+      }
+
+      .file-name {
+        color: #65708a;
+        display: block;
+        font-size: 24px;
+        line-height: 1.2;
+        margin-top: 10px;
+        overflow-wrap: anywhere;
+      }
+
+      .visually-hidden {
+        height: 1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        pointer-events: none;
+        width: 1px;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 8px;
+        cursor: pointer;
+        font: inherit;
+        font-size: 16px;
+        font-weight: 850;
+        padding: 14px 18px;
+      }
+
+      .primary {
+        color: white;
+        background: linear-gradient(90deg, var(--blue), var(--pink));
+      }
+
+      .secondary {
+        color: var(--text);
+        background: #eef2f8;
+        border: 1px solid var(--line);
+      }
+
+      .table {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .tabs {
+        background: #eef2f8;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        display: grid;
+        gap: 6px;
+        grid-template-columns: 1fr 1fr;
+        margin-bottom: 16px;
+        padding: 6px;
+      }
+
+      .tab-button {
+        background: transparent;
+        color: #4c5570;
+        padding: 11px 14px;
+      }
+
+      .tab-button.active {
+        background: white;
+        color: var(--blue);
+        box-shadow: 0 2px 8px rgba(50, 57, 91, 0.08);
+      }
+
+      .tab-view {
+        display: none;
+      }
+
+      .tab-view.active {
+        display: block;
+      }
+
+      .metrics-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .metric-card {
+        background: #f8faff;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+      }
+
+      .metric-value {
+        color: var(--blue);
+        font-size: 30px;
+        font-weight: 850;
+        line-height: 1;
+      }
+
+      .metric-label {
+        color: #4c5570;
+        font-size: 14px;
+        font-weight: 800;
+        margin-top: 8px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 0.42fr 0.58fr;
+        border-top: 1px solid var(--line);
+        min-height: 66px;
+      }
+
+      .row:first-child {
+        border-top: 0;
+        min-height: auto;
+        background: #f1f5fb;
+        color: #4c5570;
+        font-weight: 850;
+      }
+
+      .cell {
+        padding: 16px;
+        font-size: 16px;
+        overflow-wrap: anywhere;
+      }
+
+      .text-cell {
+        font-weight: 800;
+      }
+
+      .data-row {
+        position: relative;
+      }
+
+      .term-stack {
+        display: grid;
+        gap: 10px;
+      }
+
+      .result-cell {
+        min-height: 42px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        color: #995f00;
+        font-weight: 750;
+        line-height: 1.45;
+        outline: none;
+        padding-right: 112px;
+        position: relative;
+      }
+
+      .result-cell:focus {
+        border-color: #77b7f5;
+        background: #f7fbff;
+      }
+
+      .not-found {
+        color: #9a4b5f;
+      }
+
+      .mini-action {
+        background: #eef4ff;
+        border: 1px solid #cddbf5;
+        color: #245fb2;
+        font-size: 13px;
+        padding: 8px 10px;
+      }
+
+      .explain-button {
+        justify-self: start;
+      }
+
+      .result-wrap {
+        position: relative;
+      }
+
+      .row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .edit-button {
+        opacity: 0;
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        transition: opacity 140ms ease;
+      }
+
+      .result-wrap:hover .edit-button,
+      .result-wrap:focus-within .edit-button {
+        opacity: 1;
+      }
+
+      .explanation-row {
+        background: #f8faff;
+        display: none;
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .explanation-row.open {
+        display: grid;
+      }
+
+      .explanation {
+        border-left: 4px solid var(--blue);
+        color: #46516c;
+        line-height: 1.5;
+      }
+
+      .modal-backdrop {
+        align-items: center;
+        background: rgba(18, 25, 42, 0.42);
+        display: none;
+        inset: 0;
+        justify-content: center;
+        padding: 20px;
+        position: fixed;
+        z-index: 10;
+      }
+
+      .modal-backdrop.open {
+        display: flex;
+      }
+
+      .editor-modal {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 24px 70px rgba(20, 31, 55, 0.24);
+        max-width: 720px;
+        padding: 22px;
+        width: min(100%, 720px);
+      }
+
+      .editor-modal textarea {
+        min-height: 220px;
+      }
+
+      .modal-title {
+        font-size: 22px;
+        font-weight: 850;
+        margin-bottom: 14px;
+      }
+
+      @media (max-width: 960px) {
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        h1 {
+          font-size: 46px;
+        }
+
+        .workspace {
+          padding: 18px 14px 28px;
+        }
+
+        .row {
+          grid-template-columns: 1fr;
+        }
+
+        .metrics-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .result-cell {
+          padding-right: 14px;
+        }
+
+        .edit-button {
+          margin-top: 10px;
+          opacity: 1;
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <div class="brand">
+          <div class="eyebrow">Any Text Search</div>
+          <h1>TextLense</h1>
+        </div>
+        <div class="status" id="status">Ready</div>
+      </header>
+
+      <section class="workspace">
+        <section class="panel" aria-labelledby="input-title">
+          <div class="panel-head">
+            <h2 class="title" id="input-title">Search any document text</h2>
+          </div>
+
+          <div class="field-group">
+            <div>
+              <label for="search-input">Texts to search</label>
+              <input id="search-input" type="text" placeholder="Enter up to 5 texts separated by commas" />
+            </div>
+
+            <div>
+              <label for="file-input">Upload PDF or document</label>
+              <label class="upload-box" for="file-input">
+                <span class="upload-plus">+</span>
+                <span>
+                  <span class="upload-title">Upload PDF or DOCX</span>
+                  <span class="file-name" id="file-name">No file selected</span>
+                </span>
+              </label>
+              <input id="file-input" class="visually-hidden" type="file" accept=".txt,.pdf,.doc,.docx" />
+            </div>
+
+            <div>
+              <label for="document-input">Document text</label>
+              <textarea id="document-input" placeholder="Paste any text here..."></textarea>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button class="primary" id="extract-button">Extract 5 Texts</button>
+            <button class="secondary" id="clear-button">Clear</button>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="results-title">
+          <div class="panel-head">
+            <h2 class="title" id="results-title">Results</h2>
+            <div class="count" id="found-count">0 found</div>
+          </div>
+
+          <div class="tabs" aria-label="Results tabs">
+            <button class="tab-button active" id="results-tab" type="button">Results</button>
+            <button class="tab-button" id="metrics-tab" type="button">Metrics</button>
+          </div>
+
+          <div class="tab-view active" id="results-view">
+          <div class="table" aria-label="Search extraction results">
+            <div class="row">
+              <div class="cell">Text</div>
+              <div class="cell">Extracted text</div>
+            </div>
+            <div class="row data-row" data-index="0">
+              <div class="cell term-stack">
+                <div class="text-cell">Text 1</div>
+                <button class="mini-action explain-button" type="button">AI Explanation</button>
+              </div>
+              <div class="cell result-wrap">
+                <div class="result-cell not-found" contenteditable="true">Not Found</div>
+                <button class="mini-action edit-button" type="button">Edit Value</button>
+                <div class="row-actions">
+                  <button class="mini-action validate-button" type="button">Validate</button>
+                  <button class="mini-action rewrite-button" type="button">AI Rewrite</button>
+                </div>
+              </div>
+            </div>
+            <div class="row explanation-row" data-explanation-index="0">
+              <div class="cell explanation">No search has been run for this row yet.</div>
+            </div>
+            <div class="row data-row" data-index="1">
+              <div class="cell term-stack">
+                <div class="text-cell">Text 2</div>
+                <button class="mini-action explain-button" type="button">AI Explanation</button>
+              </div>
+              <div class="cell result-wrap">
+                <div class="result-cell not-found" contenteditable="true">Not Found</div>
+                <button class="mini-action edit-button" type="button">Edit Value</button>
+                <div class="row-actions">
+                  <button class="mini-action validate-button" type="button">Validate</button>
+                  <button class="mini-action rewrite-button" type="button">AI Rewrite</button>
+                </div>
+              </div>
+            </div>
+            <div class="row explanation-row" data-explanation-index="1">
+              <div class="cell explanation">No search has been run for this row yet.</div>
+            </div>
+            <div class="row data-row" data-index="2">
+              <div class="cell term-stack">
+                <div class="text-cell">Text 3</div>
+                <button class="mini-action explain-button" type="button">AI Explanation</button>
+              </div>
+              <div class="cell result-wrap">
+                <div class="result-cell not-found" contenteditable="true">Not Found</div>
+                <button class="mini-action edit-button" type="button">Edit Value</button>
+                <div class="row-actions">
+                  <button class="mini-action validate-button" type="button">Validate</button>
+                  <button class="mini-action rewrite-button" type="button">AI Rewrite</button>
+                </div>
+              </div>
+            </div>
+            <div class="row explanation-row" data-explanation-index="2">
+              <div class="cell explanation">No search has been run for this row yet.</div>
+            </div>
+            <div class="row data-row" data-index="3">
+              <div class="cell term-stack">
+                <div class="text-cell">Text 4</div>
+                <button class="mini-action explain-button" type="button">AI Explanation</button>
+              </div>
+              <div class="cell result-wrap">
+                <div class="result-cell not-found" contenteditable="true">Not Found</div>
+                <button class="mini-action edit-button" type="button">Edit Value</button>
+                <div class="row-actions">
+                  <button class="mini-action validate-button" type="button">Validate</button>
+                  <button class="mini-action rewrite-button" type="button">AI Rewrite</button>
+                </div>
+              </div>
+            </div>
+            <div class="row explanation-row" data-explanation-index="3">
+              <div class="cell explanation">No search has been run for this row yet.</div>
+            </div>
+            <div class="row data-row" data-index="4">
+              <div class="cell term-stack">
+                <div class="text-cell">Text 5</div>
+                <button class="mini-action explain-button" type="button">AI Explanation</button>
+              </div>
+              <div class="cell result-wrap">
+                <div class="result-cell not-found" contenteditable="true">Not Found</div>
+                <button class="mini-action edit-button" type="button">Edit Value</button>
+                <div class="row-actions">
+                  <button class="mini-action validate-button" type="button">Validate</button>
+                  <button class="mini-action rewrite-button" type="button">AI Rewrite</button>
+                </div>
+              </div>
+            </div>
+            <div class="row explanation-row" data-explanation-index="4">
+              <div class="cell explanation">No search has been run for this row yet.</div>
+            </div>
+          </div>
+          </div>
+
+          <div class="tab-view" id="metrics-view">
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="metric-value" id="documents-reviewed">0</div>
+                <div class="metric-label">Documents reviewed</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value" id="avg-found">0%</div>
+                <div class="metric-label">Avg texts found</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value" id="validation-rate">0%</div>
+                <div class="metric-label">Validation rate</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value" id="rewrite-rate">0%</div>
+                <div class="metric-label">Rewrite usage rate</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value" id="time-saved">0 min</div>
+                <div class="metric-label">Time saved per review</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value" id="accuracy-proxy">0%</div>
+                <div class="metric-label">Accuracy proxy</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div class="modal-backdrop" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+      <div class="editor-modal">
+        <div class="modal-title" id="edit-title">Edit Value</div>
+        <textarea id="edit-textarea"></textarea>
+        <div class="button-row">
+          <button class="primary" id="save-edit" type="button">Save</button>
+          <button class="secondary" id="cancel-edit" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const searchInput = document.getElementById("search-input");
+      const fileInput = document.getElementById("file-input");
+      const documentInput = document.getElementById("document-input");
+      const extractButton = document.getElementById("extract-button");
+      const clearButton = document.getElementById("clear-button");
+      const fileName = document.getElementById("file-name");
+      const foundCount = document.getElementById("found-count");
+      const status = document.getElementById("status");
+      const editModal = document.getElementById("edit-modal");
+      const editTextarea = document.getElementById("edit-textarea");
+      const saveEdit = document.getElementById("save-edit");
+      const cancelEdit = document.getElementById("cancel-edit");
+      const resultsTab = document.getElementById("results-tab");
+      const metricsTab = document.getElementById("metrics-tab");
+      const resultsView = document.getElementById("results-view");
+      const metricsView = document.getElementById("metrics-view");
+      const documentsReviewed = document.getElementById("documents-reviewed");
+      const avgFound = document.getElementById("avg-found");
+      const validationRate = document.getElementById("validation-rate");
+      const rewriteRate = document.getElementById("rewrite-rate");
+      const timeSaved = document.getElementById("time-saved");
+      const accuracyProxy = document.getElementById("accuracy-proxy");
+      const textCells = Array.from(document.querySelectorAll(".text-cell"));
+      const resultCells = Array.from(document.querySelectorAll(".result-cell"));
+      const explanationRows = Array.from(document.querySelectorAll(".explanation-row"));
+      const explanationCells = Array.from(document.querySelectorAll(".explanation"));
+      const explainButtons = Array.from(document.querySelectorAll(".explain-button"));
+      const editButtons = Array.from(document.querySelectorAll(".edit-button"));
+      const validateButtons = Array.from(document.querySelectorAll(".validate-button"));
+      const rewriteButtons = Array.from(document.querySelectorAll(".rewrite-button"));
+      let activeEditIndex = -1;
+      const metrics = {
+        documentsReviewed: 0,
+        extractionRuns: 0,
+        totalFoundPercent: 0,
+        validated: 0,
+        rewriteRequests: 0
+      };
+
+      const demoText = `Project Alpha starts on July 15.
+The customer contact is Jordan Lee.
+Invoices are due within 14 days.
+The support email is help@example.com.
+The delivery address is 45 Market Street.`;
+
+      function requestedTexts() {
+        const values = searchInput.value
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .slice(0, 5);
+
+        return Array.from({ length: 5 }, (_, index) => values[index] || `Text ${index + 1}`);
+      }
+
+      function extractAroundMatch(fullText, searchText) {
+        if (/^Text \d$/.test(searchText)) return "Not Found";
+
+        const normalizedFullText = fullText.toLowerCase();
+        const normalizedSearchText = searchText.toLowerCase();
+        const index = normalizedFullText.indexOf(normalizedSearchText);
+
+        if (index === -1) return "Not Found";
+
+        const before = fullText.lastIndexOf(".", index);
+        const after = fullText.indexOf(".", index + searchText.length);
+        const start = before >= 0 ? before + 1 : Math.max(0, index - 45);
+        const end = after >= 0 ? after + 1 : Math.min(fullText.length, index + searchText.length + 110);
+
+        return fullText.slice(start, end).replace(/\s+/g, " ").trim();
+      }
+
+      function buildExplanation(fullText, searchText, result) {
+        if (/^Text \d$/.test(searchText)) {
+          return "This row is waiting for a search text. Enter a value in the search box to generate a match.";
+        }
+
+        if (result === "Not Found") {
+          return `The text "${searchText}" was not found in the document using a case-insensitive exact text search.`;
+        }
+
+        const index = fullText.toLowerCase().indexOf(searchText.toLowerCase());
+        return `The app found "${searchText}" at character ${index + 1} and extracted the surrounding sentence or nearby text so the result has context.`;
+      }
+
+      function setResult(cell, value) {
+        const missing = value === "Not Found";
+        cell.textContent = value;
+        cell.classList.toggle("not-found", missing);
+      }
+
+      function updateCount() {
+        const found = resultCells.filter((cell) => cell.textContent.trim() && cell.textContent.trim() !== "Not Found").length;
+        foundCount.textContent = `${found} found`;
+        status.textContent = found ? `${found} Found` : "Ready";
+      }
+
+      function logEvent(name, details = {}) {
+        console.info(name, details);
+      }
+
+      function percent(value) {
+        return `${Math.round(value)}%`;
+      }
+
+      function updateMetrics() {
+        const possibleItems = Math.max(1, metrics.extractionRuns * 5);
+        const validation = (metrics.validated / possibleItems) * 100;
+        const rewrite = (metrics.rewriteRequests / possibleItems) * 100;
+        documentsReviewed.textContent = metrics.documentsReviewed;
+        avgFound.textContent = percent(metrics.extractionRuns ? metrics.totalFoundPercent / metrics.extractionRuns : 0);
+        validationRate.textContent = percent(validation);
+        rewriteRate.textContent = percent(rewrite);
+        timeSaved.textContent = `${metrics.documentsReviewed * 20} min`;
+        accuracyProxy.textContent = percent(validation);
+      }
+
+      function switchTab(tabName) {
+        const showingMetrics = tabName === "metrics";
+        resultsTab.classList.toggle("active", !showingMetrics);
+        metricsTab.classList.toggle("active", showingMetrics);
+        resultsView.classList.toggle("active", !showingMetrics);
+        metricsView.classList.toggle("active", showingMetrics);
+      }
+
+      function renderTexts(texts) {
+        textCells.forEach((cell, index) => {
+          cell.textContent = texts[index] || `Text ${index + 1}`;
+        });
+      }
+
+      function renderResults(results) {
+        resultCells.forEach((cell, index) => {
+          setResult(cell, results[index] || "Not Found");
+        });
+        updateCount();
+      }
+
+      function renderExplanations(texts, results, documentText) {
+        explanationCells.forEach((cell, index) => {
+          cell.textContent = buildExplanation(documentText, texts[index] || `Text ${index + 1}`, results[index] || "Not Found");
+        });
+      }
+
+      function extract(trackMetrics = false) {
+        const texts = requestedTexts();
+        const documentText = documentInput.value.trim();
+        const results = texts.map((text) => (documentText ? extractAroundMatch(documentText, text) : "Not Found"));
+        renderTexts(texts);
+        renderResults(results);
+        renderExplanations(texts, results, documentText);
+
+        if (trackMetrics && documentText) {
+          const found = results.filter((result) => result !== "Not Found").length;
+          metrics.documentsReviewed += 1;
+          metrics.extractionRuns += 1;
+          metrics.totalFoundPercent += (found / 5) * 100;
+          updateMetrics();
+          logEvent("terms_extracted", { found, searched: 5 });
+        }
+      }
+
+      function readUInt16(bytes, offset) {
+        return bytes[offset] | (bytes[offset + 1] << 8);
+      }
+
+      function readUInt32(bytes, offset) {
+        return (bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24)) >>> 0;
+      }
+
+      async function inflateRaw(bytes) {
+        if (!("DecompressionStream" in window)) {
+          throw new Error("This browser cannot decompress DOCX files.");
+        }
+
+        const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+        return new Uint8Array(await new Response(stream).arrayBuffer());
+      }
+
+      async function readZipEntry(bytes, entryName) {
+        let endOfCentralDirectory = -1;
+        for (let offset = bytes.length - 22; offset >= Math.max(0, bytes.length - 66000); offset -= 1) {
+          if (readUInt32(bytes, offset) === 0x06054b50) {
+            endOfCentralDirectory = offset;
+            break;
+          }
+        }
+
+        if (endOfCentralDirectory === -1) {
+          throw new Error("This DOCX file could not be opened.");
+        }
+
+        const centralDirectorySize = readUInt32(bytes, endOfCentralDirectory + 12);
+        const centralDirectoryOffset = readUInt32(bytes, endOfCentralDirectory + 16);
+        const centralDirectoryEnd = centralDirectoryOffset + centralDirectorySize;
+
+        for (let offset = centralDirectoryOffset; offset < centralDirectoryEnd; ) {
+          if (readUInt32(bytes, offset) !== 0x02014b50) break;
+
+          const method = readUInt16(bytes, offset + 10);
+          const compressedSize = readUInt32(bytes, offset + 20);
+          const fileNameLength = readUInt16(bytes, offset + 28);
+          const extraLength = readUInt16(bytes, offset + 30);
+          const commentLength = readUInt16(bytes, offset + 32);
+          const localHeaderOffset = readUInt32(bytes, offset + 42);
+          const nameStart = offset + 46;
+          const fileName = new TextDecoder().decode(bytes.slice(nameStart, nameStart + fileNameLength));
+
+          if (fileName === entryName) {
+            const localNameLength = readUInt16(bytes, localHeaderOffset + 26);
+            const localExtraLength = readUInt16(bytes, localHeaderOffset + 28);
+            const dataStart = localHeaderOffset + 30 + localNameLength + localExtraLength;
+            const compressed = bytes.slice(dataStart, dataStart + compressedSize);
+
+            if (method === 0) return compressed;
+            if (method === 8) return inflateRaw(compressed);
+            throw new Error("Unsupported DOCX compression method.");
+          }
+
+          offset = nameStart + fileNameLength + extraLength + commentLength;
+        }
+
+        throw new Error("Document text was not found in this DOCX file.");
+      }
+
+      function xmlToText(xml) {
+        return xml
+          .replace(/<w:tab\/>/g, "\t")
+          .replace(/<\/w:p>/g, "\n")
+          .replace(/<\/w:tr>/g, "\n")
+          .replace(/<[^>]+>/g, "")
+          .replace(/&amp;/g, "&")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/&quot;/g, '"')
+          .replace(/&apos;/g, "'")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+      }
+
+      async function extractDocxText(file) {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        const documentXml = await readZipEntry(bytes, "word/document.xml");
+        return xmlToText(new TextDecoder("utf-8").decode(documentXml));
+      }
+
+      async function extractPdfText(file) {
+        const decoded = new TextDecoder("latin1").decode(await file.arrayBuffer());
+        const matches = [...decoded.matchAll(/\(([^()]{2,})\)\s*Tj|\[([^\]]+)\]\s*TJ/g)];
+        const text = matches
+          .map((match) => match[1] || match[2].replace(/\(([^()]*)\)/g, "$1 "))
+          .join(" ")
+          .replace(/\\([()\\])/g, "$1")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        return text || "";
+      }
+
+      extractButton.addEventListener("click", () => extract(true));
+      searchInput.addEventListener("input", () => extract());
+      documentInput.addEventListener("input", () => extract());
+      resultsTab.addEventListener("click", () => switchTab("results"));
+      metricsTab.addEventListener("click", () => switchTab("metrics"));
+
+      clearButton.addEventListener("click", () => {
+        searchInput.value = "";
+        fileInput.value = "";
+        fileName.textContent = "No file selected";
+        documentInput.value = "";
+        renderTexts([]);
+        renderResults(Array(5).fill("Not Found"));
+        renderExplanations(requestedTexts(), Array(5).fill("Not Found"), "");
+      });
+
+      fileInput.addEventListener("change", async () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        fileName.textContent = file.name;
+        status.textContent = "Reading";
+
+        try {
+          const lowerName = file.name.toLowerCase();
+          if (lowerName.endsWith(".txt")) {
+            documentInput.value = await file.text();
+          } else if (lowerName.endsWith(".docx")) {
+            documentInput.value = await extractDocxText(file);
+          } else if (lowerName.endsWith(".pdf")) {
+            documentInput.value = await extractPdfText(file);
+            if (!documentInput.value) {
+              documentInput.value = "PDF text could not be extracted in this browser demo. Please paste the PDF text here.";
+            }
+          } else {
+            documentInput.value = "This file type cannot be read directly in this browser demo. Please upload TXT, DOCX, or PDF, or paste the text here.";
+          }
+
+          status.textContent = documentInput.value ? "Loaded" : "File Selected";
+          logEvent("contract_uploaded", { file_name: file.name, file_type: lowerName.split(".").pop() });
+          extract(true);
+        } catch (error) {
+          documentInput.value = error.message || "Could not read this file. Please paste the text here.";
+          status.textContent = "Needs Text";
+          extract();
+        }
+      });
+
+      resultCells.forEach((cell) => {
+        cell.addEventListener("input", updateCount);
+      });
+
+      explainButtons.forEach((button, index) => {
+        button.addEventListener("click", () => {
+          explanationRows[index].classList.toggle("open");
+        });
+      });
+
+      editButtons.forEach((button, index) => {
+        button.addEventListener("click", () => {
+          activeEditIndex = index;
+          editTextarea.value = resultCells[index].textContent.trim();
+          editModal.classList.add("open");
+          editTextarea.focus();
+        });
+      });
+
+      validateButtons.forEach((button, index) => {
+        button.addEventListener("click", () => {
+          metrics.validated += 1;
+          updateMetrics();
+          logEvent("clause_validated", {
+            text: textCells[index].textContent.trim(),
+            value: resultCells[index].textContent.trim()
+          });
+          button.textContent = "Validated";
+        });
+      });
+
+      rewriteButtons.forEach((button, index) => {
+        button.addEventListener("click", () => {
+          const currentValue = resultCells[index].textContent.trim();
+          if (currentValue && currentValue !== "Not Found") {
+            setResult(resultCells[index], currentValue.replace(/\s+/g, " ").trim());
+          }
+          metrics.rewriteRequests += 1;
+          updateMetrics();
+          logEvent("ai_rewrite_requested", {
+            text: textCells[index].textContent.trim(),
+            value: resultCells[index].textContent.trim()
+          });
+        });
+      });
+
+      saveEdit.addEventListener("click", () => {
+        if (activeEditIndex < 0) return;
+        setResult(resultCells[activeEditIndex], editTextarea.value.trim() || "Not Found");
+        editModal.classList.remove("open");
+        activeEditIndex = -1;
+        updateCount();
+      });
+
+      cancelEdit.addEventListener("click", () => {
+        editModal.classList.remove("open");
+        activeEditIndex = -1;
+      });
+
+      editModal.addEventListener("click", (event) => {
+        if (event.target === editModal) {
+          editModal.classList.remove("open");
+          activeEditIndex = -1;
+        }
+      });
+
+      searchInput.value = "customer contact, invoices, support email, delivery address, renewal date";
+      documentInput.value = demoText;
+      renderTexts(requestedTexts());
+      extract();
+      updateMetrics();
+    </script>
+  </body>
+</html>
